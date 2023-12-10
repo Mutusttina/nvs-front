@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance List</title>
+    <style>
+        /* Add your styling here */
+        #attendanceDate{
+            font-size: 15px;
+        }
+
+        button{
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance List</h1>
+
+    <!-- Date Input Field -->
+    <label for="attendanceDate">Select Date:</label>
+    <input type="date" id="attendanceDate" required> 
+    
+    <!-- Button to Trigger API Call -->
+    <button onclick="fetchAttendanceList()">Fetch Attendance</button>
+
+    <div style="padding-top: 10px;" id="total"></div>
+
+
+    <!-- Display List -->
+    <ul id="attendanceList"></ul>
+
+    <script>
+        // Function to format date as dd-MM-yyyy
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        // Function to fetch attendance list from the API
+        function fetchAttendanceList() {
+            // Get values from the input fields
+            const attendanceDate = formatDate(new Date(document.getElementById('attendanceDate').value));
+            const pageNo = 1; // You can change this dynamically based on your pagination logic
+            const recordSize = 100;
+
+            // Make the API call
+            fetch('http://localhost:8080/api/attendance/list', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    attendanceDate,
+                    pageNo,
+                    recordSize,
+                }),
+            })
+            .then(response => response.json())
+            .then(data =>{
+                displayAttendanceList(data.data.resultsList);
+                document.getElementById("total").innerText="Total Present Yuvaks: "+data.data.totalRecords
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to display the attendance list in the HTML
+        function displayAttendanceList(attendanceList) {
+            const listContainer = document.getElementById('attendanceList');
+            listContainer.innerHTML = ''; // Clear previous content
+
+            attendanceList.forEach(attendance => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>Yuvak Name:</strong> ${attendance.user.name}<br>
+                    <strong>UUID:</strong> ${attendance.user.uuid}<br>
+                    <strong>DOB:</strong> ${attendance.user.dob}<br>
+                    <strong>Phone:</strong> ${attendance.user.phoneNo}<br>
+                    <strong>Mandal Name:</strong> ${attendance.user.mandalDetails.name}<br>
+                    <hr>
+                `;
+                listContainer.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>

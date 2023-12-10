@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POST Data to API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            height: 30px;
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            height: 40px;
+            font-size: 18px;
+        }
+
+        #successMessage {
+            color: green;
+            margin-top: 10px;
+        }
+
+        #errorMessage {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Enter Yuvak Data</h1>
+    <form id="dataForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+
+        <label for="dob">Date of Birth:</label>
+        <input type="text" placeholder="DD/MM/YYYY" id="dob" required>
+
+        <label for="mobile">Mobile Number:</label>
+        <input type="text" id="mobile">
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+
+        <label for="mandalId">Mandal:</label>
+        <select id="mandalId" required></select>
+
+        <button type="button" onclick="postData()">Save</button>
+    </form>
+
+    <div id="successMessage"></div>
+    <div id="errorMessage"></div>
+
+    <!-- Display QR code image here -->
+    <div id="qrcodeContainer"></div>
+
+    <script>
+      function populateMandalDropdown() {
+    const mandalDropdown = document.getElementById('mandalId');
+    fetch('http://localhost:8080/api/mandal/list?page=1&recordSize=20')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const mandalList = data.data.resultsList;
+            mandalList.forEach(mandal => {
+                const option = document.createElement('option');
+                option.value = mandal.id; // Use Mandal ID as the value
+                option.text = mandal.name;
+                mandalDropdown.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
+        window.onload = populateMandalDropdown;
+
+        function showQRCodeImage(base64String) {
+            const qrcodeContainer = document.getElementById('qrcodeContainer');
+
+            // Create an image element
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + base64String; // Assuming the base64String is a PNG image
+
+            // Append the image to the container
+            qrcodeContainer.innerHTML = '';
+            qrcodeContainer.appendChild(img);
+        }
+
+        function postData() {
+            const name = document.getElementById('name').value;
+            const dobRaw = document.getElementById('dob').value;
+            const email = document.getElementById('email').value;
+            const mandalId = document.getElementById('mandalId').value;
+
+            // Convert the date format to DD-MM-YYYY
+            const dobArray = dobRaw.split('/');
+            const dob = dobArray[0] + '-' + dobArray[1] + '-' + dobArray[2];
+
+            const data = {
+                name: name,
+                dob: dob,
+                email: email,
+                mandalId: mandalId
+            };
+
+            fetch('http://localhost:8080/api/user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    document.getElementById('successMessage').innerText = 'Data saved successfully!';
+
+                    if (data.data.qrcode) {
+                        showQRCodeImage(data.data.qrcode);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    document.getElementById('errorMessage').innerText = 'Error while saving data';
+                });
+        }
+    </script>
+</body>
+
+</html>
