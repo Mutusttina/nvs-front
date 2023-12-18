@@ -16,6 +16,7 @@
     </style>
 </head>
 <body>
+    <button onclick="redirectToPage('Homepage.html')">Homepage</button>
     <h1>Attendance List</h1>
 
     <!-- Date Input Field -->
@@ -87,6 +88,13 @@
                 listContainer.appendChild(listItem);
             });
         }
+
+
+       
+        function redirectToPage(page) {
+            window.location.href = page;
+        }
+   
     </script>
 </body>
 </html>

@@ -33,6 +33,7 @@
     }
 </style>
 <body>
+    <button onclick="redirectToPage('Homepage.html')">Homepage</button>
 
 <h1>Mandal List</h1>
 
@@ -67,6 +68,10 @@
 
     // Initial API call with page=1 and recordSize=20
     fetchData(1, 20);
+
+    function redirectToPage(page) {
+            window.location.href = page;
+        }
 </script>
 
 </body>
