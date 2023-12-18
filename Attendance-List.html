@@ -22,6 +22,9 @@
     <!-- Date Input Field -->
     <label for="attendanceDate">Select Date:</label>
     <input type="date" id="attendanceDate" required> 
+
+    <label for="yuvakName">Yuvak Name:</label>
+    <input type="text" id="yuvakName"> 
     
     <!-- Button to Trigger API Call -->
     <button onclick="fetchAttendanceList()">Fetch Attendance</button>
@@ -48,7 +51,8 @@
             // Get values from the input fields
             const attendanceDate = formatDate(new Date(document.getElementById('attendanceDate').value));
             const pageNo = 1; // You can change this dynamically based on your pagination logic
-            const recordSize = 100;
+            const recordSize = 20;
+            const searchKeyword=document.getElementById('yuvakName').value;
 
             // Make the API call
             fetch('http://localhost:8080/api/attendance/list', {
@@ -58,6 +62,7 @@
                 },
                 body: JSON.stringify({
                     attendanceDate,
+                    searchKeyword,
                     pageNo,
                     recordSize,
                 }),
