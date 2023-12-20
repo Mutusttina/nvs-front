@@ -6,11 +6,11 @@
     <title>Attendance List</title>
     <style>
         /* Add your styling here */
-        #attendanceDate{
+        #attendanceDate {
             font-size: 15px;
         }
 
-        button{
+        button {
             font-size: 15px;
         }
     </style>
@@ -21,16 +21,19 @@
 
     <!-- Date Input Field -->
     <label for="attendanceDate">Select Date:</label>
-    <input type="date" id="attendanceDate" required> 
+    <input type="date" id="attendanceDate" required>
 
     <label for="yuvakName">Yuvak Name:</label>
-    <input type="text" id="yuvakName"> 
-    
+    <input type="text" id="yuvakName">
+
+    <!-- Absence Checkbox -->
+    <label for="absenceCheckbox">Absent:</label>
+    <input type="checkbox" id="absenceCheckbox">
+
     <!-- Button to Trigger API Call -->
     <button onclick="fetchAttendanceList()">Fetch Attendance</button>
 
     <div style="padding-top: 10px;" id="total"></div>
-
 
     <!-- Display List -->
     <ul id="attendanceList"></ul>
@@ -52,7 +55,8 @@
             const attendanceDate = formatDate(new Date(document.getElementById('attendanceDate').value));
             const pageNo = 1; // You can change this dynamically based on your pagination logic
             const recordSize = 20;
-            const searchKeyword=document.getElementById('yuvakName').value;
+            const searchKeyword = document.getElementById('yuvakName').value;
+            const absenceChecked = document.getElementById('absenceCheckbox').checked;
 
             // Make the API call
             fetch('http://localhost:8080/api/attendance/list', {
@@ -65,14 +69,22 @@
                     searchKeyword,
                     pageNo,
                     recordSize,
+                    isPresent: !absenceChecked, // Include the absence value in the payload
                 }),
             })
             .then(response => response.json())
-            .then(data =>{
+            .then(data => {
                 displayAttendanceList(data.data.resultsList);
-                document.getElementById("total").innerText="Total Present Yuvaks: "+data.data.totalRecords
+                if(!absenceChecked){
+                    document.getElementById("total").innerText = "Total Present Yuvaks: " + data.data.totalRecords
+                }else{
+                    document.getElementById("total").innerText = "Total Absent Yuvaks: " + data.data.totalRecords
+                }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to fetch attendance. Please try again.');
+            });
         }
 
         // Function to display the attendance list in the HTML
@@ -94,12 +106,10 @@
             });
         }
 
-
-       
         function redirectToPage(page) {
             window.location.href = page;
         }
-   
+
     </script>
 </body>
 </html>
