@@ -122,6 +122,7 @@
             const dobRaw = document.getElementById('dob').value;
             const email = document.getElementById('email').value;
             const mandalId = document.getElementById('mandalId').value;
+            const mobile = document.getElementById('mobile').value;
 
             // Convert the date format to DD-MM-YYYY
             const dobArray = dobRaw.split('/');
@@ -131,7 +132,8 @@
                 name: name,
                 dob: dob,
                 email: email,
-                mandalId: mandalId
+                mandalId: mandalId,
+                phoneNumber:mobile
             };
 
             fetch('http://localhost:8080/api/user', {
