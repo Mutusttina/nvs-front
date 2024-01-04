@@ -51,6 +51,7 @@
     </style>
 </head>
 <body>
+    <script src="/config.js"></script>
     <button onclick="redirectToPage('Homepage.html')">Homepage</button>
 
     <h1>Enter Mandal Data</h1>
@@ -86,7 +87,7 @@
                 xetra: xetra
             };
 
-            fetch('http://localhost:8080/api/mandal', {
+            fetch(`${config.apiHost}/mandal`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

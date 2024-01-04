@@ -30,8 +30,6 @@
           alert('camera stopping falied')
           // Stop failed, handle it.
         });
-        alert(decodedText);
-
         sendToAPI(decodedText)  
 
         /* handle success */
@@ -53,7 +51,7 @@
     }
 
   function sendToAPI(uuid) {
-                const apiUrl = 'http://localhost:8080/api/attendance';
+                const apiUrl = `${config.apiHost}/attendance`;
 
                 fetch(apiUrl, {
                     method: 'POST',

@@ -11,6 +11,19 @@
             margin: 20px;
         }
 
+        .button {
+            background-color: #04AA6D;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            }
+
         form {
             display: flex;
             flex-direction: column;
@@ -29,8 +42,16 @@
         }
 
         button {
-            height: 40px;
-            font-size: 18px;
+            background-color: #04AA6D;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
         }
 
         #successMessage {
@@ -46,6 +67,7 @@
 </head>
 
 <body>
+    <script src="/config.js" ></script>
     <button onclick="redirectToPage('Homepage.html')">Homepage</button>
 
     <h1>Enter Yuvak Data</h1>
@@ -53,19 +75,21 @@
         <label for="name">Name:</label>
         <input type="text" id="name" required>
 
+       
         <label for="dob">Date of Birth:</label>
-        <input type="text" placeholder="DD/MM/YYYY" id="dob" required>
+        <input type="date" id="dob">
 
         <label for="mobile">Mobile Number:</label>
-        <input type="text" id="mobile">
+        <input type="text" id="mobile" pattern="[0-9]*" maxlength="10" required>
+
 
         <label for="email">Email:</label>
-        <input type="email" id="email" required>
+        <input type="email" id="email">
 
         <label for="mandalId">Mandal:</label>
         <select id="mandalId" required></select>
 
-        <button type="button" onclick="postData()">Save</button>
+        <button type="submit" onclick="postData(event)">Save</button>
     </form>
 
     <div id="successMessage"></div>
@@ -82,7 +106,7 @@
 
       function populateMandalDropdown() {
     const mandalDropdown = document.getElementById('mandalId');
-    fetch('http://localhost:8080/api/mandal/list?page=1&recordSize=20')
+    fetch(`${config.apiHost}/mandal/list?page=1&recordSize=20`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -117,17 +141,50 @@
             qrcodeContainer.appendChild(img);
         }
 
-        function postData() {
-            const name = document.getElementById('name').value;
+        function  getDob() {
+            // Convert the date format to DD-MM-YYYY
             const dobRaw = document.getElementById('dob').value;
+
+            if(dobRaw==''){
+                return '';
+            }
+
+            const dobObject = new Date(dobRaw);
+            const day = dobObject.getDate().toString().padStart(2, '0');
+            const month = (dobObject.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+            const year = dobObject.getFullYear();
+            const dob = day + '-' + month + '-' + year;
+            return dob;
+        }
+
+        function validateName(nameInput) {
+            if (nameInput==undefined || nameInput.trim()=='') {
+                document.getElementById('errorMessage').innerText = 'Enter Name';
+                return false;
+            }
+            return true;
+        }
+
+        function validateMobileNumber(mobileInput) {
+            if (mobileInput==undefined || mobileInput.trim()=='') {
+                document.getElementById('errorMessage').innerText = 'Invalid mobile number';
+                return false;
+            }
+            return true;
+        }
+
+        function postData(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const dob = getDob();
             const email = document.getElementById('email').value;
             const mandalId = document.getElementById('mandalId').value;
             const mobile = document.getElementById('mobile').value;
 
-            // Convert the date format to DD-MM-YYYY
-            const dobArray = dobRaw.split('/');
-            const dob = dobArray[0] + '-' + dobArray[1] + '-' + dobArray[2];
-
+            if (!validateName(name) || !validateMobileNumber(mobile)) {
+                return;
+            }
+ 
             const data = {
                 name: name,
                 dob: dob,
@@ -136,21 +193,27 @@
                 phoneNumber:mobile
             };
 
-            fetch('http://localhost:8080/api/user', {
+            fetch(`${config.apiHost}/user`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(data)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if(!response.status.toString().startsWith('20')){
+                        document.getElementById('errorMessage').innerText = 'Error while saving data';
+                    }                   
+                    responseJson=response.json();
+                    return responseJson;
+                })
                 .then(data => {
                     console.log('Success:', data);
-                    document.getElementById('successMessage').innerText = 'Data saved successfully!';
-
-                    if (data.data.qrcode) {
+                    document.getElementById('successMessage').innerText = 'Data saved successfully!';                        
+                        if (data.data.qrcode) {
                         showQRCodeImage(data.data.qrcode);
-                    }
+                        }
+
                 })
                 .catch((error) => {
                     console.error('Error:', error);

@@ -36,6 +36,7 @@
     <button onclick="redirectToPage('Homepage.html')">Homepage</button>
 
 <h1>Mandal List</h1>
+<script src="/config.js"></script>
 
 <ul id="mandalList"></ul>
 <p id="pagination"></p>
@@ -44,7 +45,7 @@
     // Function to make API call and display data
     function fetchData(page, recordSize) {
         // API endpoint
-        const apiUrl = `http://localhost:8080/api/mandal/list?page=${page}&recordSize=${recordSize}`;
+        const apiUrl = `${config.apiHost}/mandal/list?page=${page}&recordSize=${recordSize}`;
 
         // Make the API call using fetch
         fetch(apiUrl)

@@ -16,6 +16,7 @@
     </style>
 </head>
 <body>
+    <script src="/config.js"></script>
     <button onclick="redirectToPage('Homepage.html')">Homepage</button>
     <h1>Attendance List</h1>
 
@@ -59,7 +60,7 @@
             const absenceChecked = document.getElementById('absenceCheckbox').checked;
 
             // Make the API call
-            fetch('http://localhost:8080/api/attendance/list', {
+            fetch(`${config.apiHost}/attendance/list`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
