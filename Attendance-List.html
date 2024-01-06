@@ -13,6 +13,10 @@
         button {
             font-size: 15px;
         }
+
+        #download_attendance{
+            background-color: rgb(245, 205, 205);
+        }
     </style>
 </head>
 <body>
@@ -33,6 +37,8 @@
 
     <!-- Button to Trigger API Call -->
     <button onclick="fetchAttendanceList()">Fetch Attendance</button>
+    <button id="download_attendance" onclick="downloadAttendanceExcel()">Download Attendance</button>
+
 
     <div style="padding-top: 10px;" id="total"></div>
 
@@ -40,6 +46,54 @@
     <ul id="attendanceList"></ul>
 
     <script>
+
+            function downloadAttendanceExcel() {
+                // Get the attendance date from the input field and format it
+                const attendanceDate = formatDate(new Date(document.getElementById('attendanceDate').value));
+                
+                // Hardcoded values for pageNo and recordSize
+                const pageNo = 1;
+                const recordSize = 1000;
+
+                // Make the API call to generate and download the Excel file
+                fetch(`${config.apiHost}/attendance/generateExcel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        attendanceDate,
+                        pageNo,
+                        recordSize,
+                    }),
+                })
+                .then(response => {
+                    // Check if the response is successful
+                    if (!response.ok) {
+                        throw new Error(`Failed to download Excel file. Status: ${response.status}`);
+                    }
+
+                    // Extract the filename from the content-disposition header
+                    //const filename = response.headers.get('content-disposition').split('filename=')[1];
+                    let filename=`Attendance_${attendanceDate.split(" ")[0]}.xlsx`
+
+                    // Convert the response to a blob
+                    return response.blob().then(blob => {
+                        // Create a temporary link element and trigger a download
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to download Excel file. Please try again.');
+                });
+            }
+
         // Function to format date as dd-MM-yyyy
         function formatDate(date) {
             const day = date.getDate().toString().padStart(2, '0');
